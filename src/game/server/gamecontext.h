@@ -10,6 +10,7 @@
 #include <game/layers.h>
 #include <game/server/teams.h>
 // #include <game/server/weapons.h>
+#include <game/localization.h>
 #include <game/voting.h>
 
 #include <base/tl/array.h>
@@ -19,6 +20,7 @@
 #include "gameworld.h"
 
 #include <memory>
+#include <stdarg.h>
 
 /*
 	Tick
@@ -131,7 +133,7 @@ class CGameContext : public IGameServer
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);
-	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
+	void LoadLanguageFiles();
 
 	bool m_Resetting;
 
@@ -205,6 +207,46 @@ public:
 
 		CHAT_SIX = 1 << 0,
 		CHAT_SIXUP = 1 << 1,
+		CHAT_SIXNUP = CHAT_SIX | CHAT_SIXUP,
+	};
+
+	// localize
+	char m_FlagLangMap[1024];
+	void UpdatePlayerLang(int ClientID, int Lang, bool IsInfoUpdate);
+	struct ContextualString
+	{
+		const char *m_pFormat;
+		const char *m_pContext;
+	};
+	const char *LocalizeFor(int ClientID, const char *pString, const char *pContext = "");
+	void SendChatLocalizedVL(int To, int Flags, ContextualString String, va_list ap);
+	void SendChatLocalized(int To, int Flags, ContextualString String, ...)
+	{
+		va_list ap;
+		va_start(ap, String);
+		SendChatLocalizedVL(To, Flags, String, ap);
+		va_end(ap);
+	}
+	void SendChatLocalized(int To, ContextualString String, ...)
+	{
+		va_list ap;
+		va_start(ap, String);
+		SendChatLocalizedVL(To, CHAT_SIXNUP, {String.m_pFormat, String.m_pContext}, ap);
+		va_end(ap);
+	};
+	void SendChatLocalized(int To, int Flags, const char *pFormat, ...)
+	{
+		va_list ap;
+		va_start(ap, pFormat);
+		SendChatLocalizedVL(To, Flags, {pFormat, ""}, ap);
+		va_end(ap);
+	};
+	void SendChatLocalized(int To, const char *pFormat, ...)
+	{
+		va_list ap;
+		va_start(ap, pFormat);
+		SendChatLocalizedVL(To, CHAT_SIXNUP, {pFormat, ""}, ap);
+		va_end(ap);
 	};
 
 	// network
@@ -216,6 +258,22 @@ public:
 	void SendMotd(int ClientID);
 	void SendSettings(int ClientID);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
+	void SendBroadcastLocalizedVL(int ClientID, int line, bool IsImportant, ContextualString String, va_list ap); 
+	void SendBroadcastLocalized(int ClientID, int Line, bool IsImportant, ContextualString String, ...)
+	{
+		va_list ap;
+		va_start(ap, String);
+		SendBroadcastLocalizedVL(ClientID, Line, IsImportant, String, ap);
+		va_end(ap);
+	}
+	void SendBroadcastLocalized(int ClientID, int Line, bool IsImportant, const char *pFormat, ...)
+	{
+		va_list ap;
+		va_start(ap, pFormat);
+		SendBroadcastLocalizedVL(ClientID, Line, IsImportant, {pFormat, ""} , ap);
+		va_end(ap);
+	}
+
 	void SendCurrentGameInfo(int ClientID, bool IsJoin);
 
 	void List(int ClientID, const char *filter);
@@ -273,7 +331,6 @@ public:
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64 m_NonEmptySince;
-	int64 m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
 	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
@@ -282,13 +339,16 @@ public:
 
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientID);
-	bool RateLimitPlayerMapVote(int ClientID);
 
 	void UpdatePlayerMaps();
 	void DoActivityCheck();
 
 	void SendClientInfo(int ClientID);
 	void SendSkinInfo(int ClientID);
+
+	// languages
+	void LoadLanguages();
+	void UnloadLanguages();
 
 private:
 	bool m_VoteWillPass;
