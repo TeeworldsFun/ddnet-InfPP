@@ -11,10 +11,10 @@
 CGameControllerTDM::CGameControllerTDM() :
 	IGameController()
 {
-	m_pGameType = "TDM";
+	m_pGameType = "CInf++";
 	m_GameFlags = IGF_TEAMS | IGF_SUDDENDEATH;
 
-	INSTANCE_CONFIG_INT(&m_RespawnDelayTDM, "respawn_delay", 3, 0, 10, CFGFLAG_CHAT | CFGFLAG_INSTANCE, "Time needed to respawn after death in tdm gametype")
+	INSTANCE_CONFIG_INT(&m_RespawnDelayTDM, "respawn_delay", 0, 0, 10, CFGFLAG_CHAT | CFGFLAG_INSTANCE, "Time needed to respawn after death in tdm gametype")
 }
 
 // event
@@ -24,6 +24,7 @@ void CGameControllerTDM::OnCharacterSpawn(CCharacter *pChr)
 
 	pChr->GiveWeapon(WEAPON_GUN, WEAPON_ID_PISTOL, 10);
 	pChr->GiveWeapon(WEAPON_HAMMER, WEAPON_ID_HAMMER, -1);
+	pChr->GiveWeapon(WEAPON_LASER, WEAPON_ID_FLASER, 5);
 }
 
 int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)

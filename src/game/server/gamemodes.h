@@ -13,14 +13,5 @@
 #endif
 
 #ifdef REGISTER_GAME_TYPE
-REGISTER_GAME_TYPE(dm, CGameControllerDM)
 REGISTER_GAME_TYPE(tdm, CGameControllerTDM)
-REGISTER_GAME_TYPE(ctf, CGameControllerCTF)
-REGISTER_GAME_TYPE(lms, CGameControllerLMS)
-REGISTER_GAME_TYPE(lts, CGameControllerLTS)
-REGISTER_GAME_TYPE(idm, CGameControllerIDM)
-REGISTER_GAME_TYPE(itdm, CGameControllerITDM)
-REGISTER_GAME_TYPE(ictf, CGameControllerICTF)
-REGISTER_GAME_TYPE(catch, CGameControllerCatch)
-REGISTER_GAME_TYPE(zcatch, CGameControllerZCatch)
 #endif

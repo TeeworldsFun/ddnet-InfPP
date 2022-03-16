@@ -735,8 +735,14 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int Weapo
 		// check for death
 		if(m_Health <= 0)
 		{
-			Die(From, Weapon);
+			if(m_pPlayer)
+			{
+				m_pPlayer->SetTeam(TEAM_RED);
+			}
 
+			IncreaseHealth(10);
+			IncreaseArmor(10);
+			
 			// set attacker's face to happy (taunt!)
 			if(!(DamageFlag & DAMAGE_NO_EMOTE) && From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 			{
